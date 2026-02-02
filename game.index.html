@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Love Platform Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  color: white;
+  overflow: hidden;
+}
+
+canvas {
+  background: #222;
+  border: 3px solid #fff;
+  margin-top: 10px;
+}
+
+.controller {
+  position: fixed;
+  bottom: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #ff4d6d;
+  color: white;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+#message {
+  position: fixed;
+  top: 40%;
+  font-size: 28px;
+  text-align: center;
+  display: none;
+  z-index: 10;
+}
+.heart {
+  position: fixed;
+  color: pink;
+  font-size: 20px;
+  animation: fall 3s linear infinite;
+}
+@keyframes fall {
+  from { transform: translateY(-50px); opacity: 1; }
+  to { transform: translateY(100vh); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+<canvas id="game" width="320" height="180"></canvas>
+
+<div id="message">💖 happy 555days anniversary em bé iu 💖</div>
+
+<div class="controller">
+  <div class="btn" id="left">⬅️</div>
+  <div class="btn" id="jump">⬆️</div>
+  <div class="btn" id="right">➡️</div>
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let player = { x: 20, y: 120, w: 20, h: 20, vy: 0, onGround: false };
+const gravity = 0.8;
+const ground = 150;
+const goal = { x: 280, y: 120, w: 20, h: 20 };
+
+let keys = { left:false, right:false };
+
+function update() {
+  if (keys.left) player.x -= 2;
+  if (keys.right) player.x += 2;
+
+  player.vy += gravity;
+  player.y += player.vy;
+
+  if (player.y + player.h >= ground) {
+    player.y = ground - player.h;
+    player.vy = 0;
+    player.onGround = true;
+  } else player.onGround = false;
+
+  if (
+    player.x < goal.x + goal.w &&
+    player.x + player.w > goal.x &&
+    player.y < goal.y + goal.h &&
+    player.y + player.h > goal.y
+  ) {
+    win();
+  }
+}
+
+function draw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, ground, canvas.width, 5);
+
+  ctx.fillStyle = "#4ddcff";
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+
+  ctx.fillStyle = "#ff4d6d";
+  ctx.fillRect(goal.x, goal.y, goal.w, goal.h);
+}
+
+function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+
+function jump() {
+  if (player.onGround) {
+    player.vy = -10;
+  }
+}
+
+function win() {
+  document.getElementById("message").style.display = "block";
+  createHearts();
+  loop = function(){};
+}
+
+document.getElementById("left").ontouchstart = () => keys.left = true;
+document.getElementById("left").ontouchend = () => keys.left = false;
+document.getElementById("right").ontouchstart = () => keys.right = true;
+document.getElementById("right").ontouchend = () => keys.right = false;
+document.getElementById("jump").ontouchstart = jump;
+
+function createHearts() {
+  setInterval(() => {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerText = "❤️";
+    heart.style.left = Math.random() * 100 + "vw";
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 3000);
+  }, 200);
+}
+</script>
+</body>
+</html>
